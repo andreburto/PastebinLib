@@ -197,15 +197,35 @@ namespace PastebinLib
     static class PastebinOptions
     {
         // PRIVATE CONSTANTS
-        static private const string LANGUAGES = "PastebinLib.Languages.txt";
-        static private const string PRIVACY = "PastebinLib.Privacy.txt";
-        static private const string EXPIRES = "PastebinLib.Expires.txt";
+        static private string LANGUAGES = "PastebinLib.Languages.txt";
+        static private string PRIVACY = "PastebinLib.Privacy.txt";
+        static private string EXPIRES = "PastebinLib.Expires.txt";
+
+        // PUBLIC READ-ONLY PROPERTIES
+        static public Hashtable Languages { get { return LoadOptions(LANGUAGES); } }
+        static public Hashtable Privacy { get { return LoadOptions(PRIVACY); } }
+        static public Hashtable Expires { get { return LoadOptions(EXPIRES); } }
+
 
         // Fetch the results
-        private Hashtable LoadOptions(string choice)
+        static private Hashtable LoadOptions(string choice)
         {
             Hashtable values = new Hashtable();
-
+            string bulk_read = "";
+            string[] rows_read;
+            // Read the embedded file
+            Assembly a = Assembly.GetExecutingAssembly();
+            StreamReader sr = new StreamReader(a.GetManifestResourceStream(choice));
+            bulk_read = sr.ReadToEnd();
+            rows_read = bulk_read.Replace("\n", "").Split('\r');
+            if (rows_read.Length > 0)
+            {
+                foreach (string row in rows_read)
+                {
+                    string[] parts = row.Split('=');
+                    values.Add(parts[0], parts[1]);
+                }
+            }
             return values;
         }
     }
