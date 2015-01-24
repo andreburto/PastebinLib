@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.IO;
 using System.Net;
+using System.Reflection;
 using System.Text;
 namespace PastebinLib
 {
@@ -176,6 +178,7 @@ namespace PastebinLib
         // With two arguments: DeveloperApiKey, UserApiKey
         public Pastebin(string dak, string uak) { _developer_api_key = dak; _user_key = uak; }
     }
+
     // Pastebin class functions often take Hashtabe arguments.
     // PastebinAtgs will accept arguments and then output them as a Hashtable.
     class PastebinArgs
@@ -185,7 +188,25 @@ namespace PastebinLib
             Hashtable ht = new Hashtable();
             return ht;
         }
+
         // CONSTRUCTOR
         public PastebinArgs() { }
+    }
+
+    // Pastebin language options
+    static class PastebinOptions
+    {
+        // PRIVATE CONSTANTS
+        static private const string LANGUAGES = "PastebinLib.Languages.txt";
+        static private const string PRIVACY = "PastebinLib.Privacy.txt";
+        static private const string EXPIRES = "PastebinLib.Expires.txt";
+
+        // Fetch the results
+        private Hashtable LoadOptions(string choice)
+        {
+            Hashtable values = new Hashtable();
+
+            return values;
+        }
     }
 }
