@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Specialized;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
@@ -80,6 +81,7 @@ namespace PastebinLib
             }
             return retval;
         }
+
         // Get the UserApiKey
         public string GetUserKey(Hashtable args)
         {
@@ -183,14 +185,47 @@ namespace PastebinLib
     // PastebinAtgs will accept arguments and then output them as a Hashtable.
     class PastebinArgs
     {
-        public Hashtable ToHashtable()
+        protected Hashtable ht;
+
+        /*****
+         * api_dev_key
+         * api_option
+         * api_paste_code
+         * api_paste_expire_date
+         * api_paste_format
+         * api_paste_key
+         * api_paste_name
+         * api_paste_private
+         * api_results_limit
+         * api_user_key
+         * api_user_name
+         * api_user_password
+         * paste_key
+         *****/
+
+        // Return the hash, a function to match ToString
+        public Hashtable ToHashtable() { return ht; }
+
+        // Display all set keys
+        public override string ToString()
         {
-            Hashtable ht = new Hashtable();
-            return ht;
+            string temp = "";
+            if (ht.Keys.Count > 0)
+            {
+                foreach (string key in ht.Keys.Cast<string>().OrderBy(c => c))
+                {
+                    temp += String.Format("{0} = {1}\r\n", key, ht[key].ToString());
+                }
+            }
+            else
+            {
+                temp = "No keys set.";
+            }
+            return temp;
         }
 
         // CONSTRUCTOR
-        public PastebinArgs() { }
+        public PastebinArgs() { ht = new Hashtable(); }
     }
 
     // Pastebin language options
