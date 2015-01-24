@@ -82,6 +82,7 @@
     <EmbeddedResource Include="Languages.txt" />
     <EmbeddedResource Include="Expires.txt" />
     <EmbeddedResource Include="Privacy.txt" />
+    <None Include="csharp-make-properties.pl" />
     <Content Include="README.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -13,10 +13,14 @@ namespace PastebinLib
     public partial class Form1 : Form
     {
         private Pastebin pb;
+        private PastebinArgs pba;
         public Form1()
         {
             InitializeComponent();
             pb = new Pastebin();
+            pba = new PastebinArgs();
+            pba.paste_key = "";
+            pba.api_dev_key = "";
         }
         private void btnGet_Click(object sender, EventArgs e)
         {
@@ -25,15 +29,8 @@ namespace PastebinLib
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            Hashtable langs = PastebinOptions.Expires;
-            string hold_me = "";
-
-            foreach (string key in langs.Keys.Cast<string>().OrderBy(c => c))
-            {
-                hold_me += String.Format("{0} = {1}\r\n", key, langs[key].ToString());
-            }
-
-            textBox3.Text = hold_me;
+            txtUrlKey.Text = pba.paste_key;
+            textBox3.Text = pba.ToString();
         }
     }
 }

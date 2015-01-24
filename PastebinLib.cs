@@ -180,32 +180,80 @@ namespace PastebinLib
         // With two arguments: DeveloperApiKey, UserApiKey
         public Pastebin(string dak, string uak) { _developer_api_key = dak; _user_key = uak; }
     }
-
     // Pastebin class functions often take Hashtabe arguments.
     // PastebinAtgs will accept arguments and then output them as a Hashtable.
     class PastebinArgs
     {
+        // PRIVATE hashtable where values are stored
         protected Hashtable ht;
-
-        /*****
-         * api_dev_key
-         * api_option
-         * api_paste_code
-         * api_paste_expire_date
-         * api_paste_format
-         * api_paste_key
-         * api_paste_name
-         * api_paste_private
-         * api_results_limit
-         * api_user_key
-         * api_user_name
-         * api_user_password
-         * paste_key
-         *****/
-
+        // PUBLIC string properties to set and get API arguments
+        public string api_dev_key
+        {
+            get { return ht.ContainsKey("api_dev_key") ? ht["api_dev_key"].ToString() : ""; }
+            set { ht["api_dev_key"] = value; }
+        }
+        public string api_option
+        {
+            get { return ht.ContainsKey("api_option") ? ht["api_option"].ToString() : ""; }
+            set { ht["api_option"] = value; }
+        }
+        public string api_paste_code
+        {
+            get { return ht.ContainsKey("api_paste_code") ? ht["api_paste_code"].ToString() : ""; }
+            set { ht["api_paste_code"] = value; }
+        }
+        public string api_paste_expire_date
+        {
+            get { return ht.ContainsKey("api_paste_expire_date") ? ht["api_paste_expire_date"].ToString() : ""; }
+            set { ht["api_paste_expire_date"] = value; }
+        }
+        public string api_paste_format
+        {
+            get { return ht.ContainsKey("api_paste_format") ? ht["api_paste_format"].ToString() : ""; }
+            set { ht["api_paste_format"] = value; }
+        }
+        public string api_paste_key
+        {
+            get { return ht.ContainsKey("api_paste_key") ? ht["api_paste_key"].ToString() : ""; }
+            set { ht["api_paste_key"] = value; }
+        }
+        public string api_paste_name
+        {
+            get { return ht.ContainsKey("api_paste_name") ? ht["api_paste_name"].ToString() : ""; }
+            set { ht["api_paste_name"] = value; }
+        }
+        public string api_paste_private
+        {
+            get { return ht.ContainsKey("api_paste_private") ? ht["api_paste_private"].ToString() : ""; }
+            set { ht["api_paste_private"] = value; }
+        }
+        public string api_results_limit
+        {
+            get { return ht.ContainsKey("api_results_limit") ? ht["api_results_limit"].ToString() : ""; }
+            set { ht["api_results_limit"] = value; }
+        }
+        public string api_user_key
+        {
+            get { return ht.ContainsKey("api_user_key") ? ht["api_user_key"].ToString() : ""; }
+            set { ht["api_user_key"] = value; }
+        }
+        public string api_user_name
+        {
+            get { return ht.ContainsKey("api_user_name") ? ht["api_user_name"].ToString() : ""; }
+            set { ht["api_user_name"] = value; }
+        }
+        public string api_user_password
+        {
+            get { return ht.ContainsKey("api_user_password") ? ht["api_user_password"].ToString() : ""; }
+            set { ht["api_user_password"] = value; }
+        }
+        public string paste_key
+        {
+            get { return ht.ContainsKey("paste_key") ? ht["paste_key"].ToString() : ""; }
+            set { ht["paste_key"] = value; }
+        }
         // Return the hash, a function to match ToString
         public Hashtable ToHashtable() { return ht; }
-
         // Display all set keys
         public override string ToString()
         {
@@ -223,7 +271,6 @@ namespace PastebinLib
             }
             return temp;
         }
-
         // CONSTRUCTOR
         public PastebinArgs() { ht = new Hashtable(); }
     }
@@ -235,13 +282,10 @@ namespace PastebinLib
         static private string LANGUAGES = "PastebinLib.Languages.txt";
         static private string PRIVACY = "PastebinLib.Privacy.txt";
         static private string EXPIRES = "PastebinLib.Expires.txt";
-
         // PUBLIC READ-ONLY PROPERTIES
         static public Hashtable Languages { get { return LoadOptions(LANGUAGES); } }
         static public Hashtable Privacy { get { return LoadOptions(PRIVACY); } }
         static public Hashtable Expires { get { return LoadOptions(EXPIRES); } }
-
-
         // Fetch the results
         static private Hashtable LoadOptions(string choice)
         {
