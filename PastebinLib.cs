@@ -39,7 +39,6 @@ namespace PastebinLib
         // Makes a new post
         public string NewPaste(Hashtable args)
         {
-
             string retval;
             try
             {
@@ -73,7 +72,26 @@ namespace PastebinLib
             }
             return retval;
         }
-
+        // Delete a Paste
+        public string DeletePaste(Hashtable args)
+        {
+            return "";
+        }
+        // Get User info and settings 
+        public string GetUserInfo(Hashtable args)
+        {
+            return "";
+        }
+        // List Trending Pastes
+        public string GetTrendingPastes(Hashtable args)
+        {
+            return "";
+        }
+        // List user Pastes
+        public string GetUserPastes(Hashtable args)
+        {
+            return "";
+        }
         // Get the UserApiKey
         public string GetUserKey(Hashtable args)
         {
