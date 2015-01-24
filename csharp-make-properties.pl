@@ -1,7 +1,4 @@
 ﻿#!/usr/bin/perl -w
-#####
-# A TOOL TO GENERATE THE PROPERTIES IN PastebinArgs BECAUSE I AM LAZY
-#####
 use strict;
 use warnings;
 
@@ -10,10 +7,9 @@ while(<DATA>) {
     print <<"EOL"
         public string $_
         {
-            get { return ht.ContainsKey("$_") ? ht["$_"].ToString() : ""; }
+            get { return GetVal("$_"); }
             set { ht["$_"] = value; }
         }
-
 EOL
 }
 

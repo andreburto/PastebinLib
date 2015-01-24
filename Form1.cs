@@ -19,18 +19,28 @@ namespace PastebinLib
             InitializeComponent();
             pb = new Pastebin();
             pba = new PastebinArgs();
-            pba.paste_key = "";
-            pba.api_dev_key = "";
+            txtDevKey.Text = "";
         }
         private void btnGet_Click(object sender, EventArgs e)
         {
+            if (txtUrlKey.Text.Length == 0) { return; }
             textBox3.Text = pb.GetPost(txtUrlKey.Text);
+        }
+
+        private void btnPost_Click(object sender, EventArgs e)
+        {
+            if (textBox3.Text.Length == 0) { return; }
+            pba.api_dev_key = txtDevKey.Text;
+            pba.api_paste_expire_date = "1H";
+            pba.api_option = "paste";
+            pba.api_paste_code = textBox3.Text;
+            MessageBox.Show(pba.ToString());
+            string res = pb.NewPaste(pba.ToHashtable());
+            txtUrlKey.Text = res;
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            txtUrlKey.Text = pba.paste_key;
-            textBox3.Text = pba.ToString();
         }
     }
 }

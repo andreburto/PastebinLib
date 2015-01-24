@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Text;
+using System.Web;
 namespace PastebinLib
 {
     class Pastebin
@@ -33,13 +33,13 @@ namespace PastebinLib
         {
             string url = String.Format("{0}?i={1}", _get_raw_url, key);
             string res = MakeGet(url);
-            if (res.Length == 0) { return "Nothing returned."; }
+            if (res.Length == 0) { return "ERROR: Nothing returned."; }
             return res;
         }
         // Makes a new post
-        public string NewPost(Hashtable args)
+        public string NewPaste(Hashtable args)
         {
-            NameValueCollection vals = new NameValueCollection();
+
             string retval;
             try
             {
@@ -57,23 +57,15 @@ namespace PastebinLib
                     }
                     else
                     {
-                        vals.Add("api_dev_key", _developer_api_key);
+                        args.Add("api_dev_key", _developer_api_key);
                     }
-                }
-                else
-                {
-                    vals.Add("api_dev_key", args["api_dev_key"].ToString());
                 }
                 // Default to paste
                 if (args.ContainsKey("api_option") == false)
                 {
-                    vals.Add("api_option", "paste");
+                    args.Add("api_option", "paste");
                 }
-                else
-                {
-                    vals.Add("api_option", args["api_option"].ToString());
-                }
-                retval = MakePost(_post_url, vals);
+                retval = MakePost(_post_url, args);
             }
             catch (Exception ex)
             {
@@ -85,7 +77,6 @@ namespace PastebinLib
         // Get the UserApiKey
         public string GetUserKey(Hashtable args)
         {
-            NameValueCollection vals = new NameValueCollection();
             string retval;
             try
             {
@@ -94,18 +85,10 @@ namespace PastebinLib
                 {
                     throw new Exception("No api_user_name");
                 }
-                else
-                {
-                    vals.Add("api_user_name", args["api_user_name"].ToString());
-                }
                 // Check for password
                 if (args.ContainsKey("api_user_password") == false)
                 {
-                    throw new Exception("api_user_password");
-                }
-                else
-                {
-                    vals.Add("api_user_password", args["api_user_password"].ToString());
+                    throw new Exception("No api_user_password");
                 }
                 // You do not have to pass an api_dev_key but it must be set
                 if (args.ContainsKey("api_dev_key") == false)
@@ -116,14 +99,10 @@ namespace PastebinLib
                     }
                     else
                     {
-                        vals.Add("api_dev_key", _developer_api_key);
+                        args.Add("api_dev_key", _developer_api_key);
                     }
                 }
-                else
-                {
-                    vals.Add("api_dev_key", args["api_dev_key"].ToString());
-                }
-                retval = MakePost(_login_url, vals);
+                retval = MakePost(_login_url, args);
                 // Go on and assign the local variable if we get this far
                 if (retval.Length > 0) { _user_key = retval; }
             }
@@ -133,47 +112,73 @@ namespace PastebinLib
             }
             return retval;
         }
-        // Handles the POST requests
-        protected string MakePost(string url, NameValueCollection args)
+        // Compresses a Hashtable into a POST data string
+        protected string MakeDataString(Hashtable h)
         {
-            WebClient wc = new WebClient();
+            ArrayList temp = new ArrayList();
+            foreach (string k in h.Keys)
+            {
+                temp.Add(String.Format("{0}={1}", k, HttpUtility.UrlEncode(h[k].ToString())));
+            }
+            return String.Join("&", (string[])temp.ToArray(typeof(string)));
+        }
+        // Handles the POST requests
+        protected string MakePost(string url, Hashtable args)
+        {
             string retval = "";
+            string data = MakeDataString(args);
+
+            WebClient wc = new WebClient();
+            wc.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+            wc.Encoding = Encoding.UTF8;
+
             try
             {
-                byte[] res = wc.UploadValues(url, "POST", args);
-                retval = Encoding.UTF8.GetString(res);
+                byte[] result = wc.UploadData(url, "POST", Encoding.UTF8.GetBytes(data));
+                retval = Encoding.UTF8.GetString(result);
             }
             catch (WebException we)
             {
-                retval = String.Format("WEB EXCEPTION: (MakePost) {0}", we.Message);
+                retval = String.Format("ERROR: WEB EXCEPTION (MakeGet) {0}", we.Message);
             }
             catch (Exception ex)
             {
-                retval = String.Format("EXCEPTION: (MakePost) {0}", ex.Message);
+                retval = String.Format("ERROR: EXCEPTION (MakeGet) {0}", ex.Message);
+            }
+            finally
+            {
+                wc.Dispose();
             }
             return retval;
         }
         // Handles GET requests
         protected string MakeGet(string url)
         {
-            WebClient wc = new WebClient();
             string retval = "";
+
+            WebClient wc = new WebClient();
+            wc.Encoding = Encoding.UTF8;
+
             try
             {
                 retval = wc.DownloadString(url);
+                wc.Dispose();
             }
             catch (WebException we)
             {
-                retval = String.Format("WEB EXCEPTION: (MakeGet) {0}", we.Message);
+                retval = String.Format("ERROR: WEB EXCEPTION (MakeGet) {0}", we.Message);
             }
             catch (Exception ex)
             {
-                retval = String.Format("EXCEPTION: (MakeGet) {0}", ex.Message);
+                retval = String.Format("ERROR: EXCEPTION (MakeGet) {0}", ex.Message);
+            }
+            finally
+            {
+                wc.Dispose();
             }
             return retval;
         }
-        // CONSTRUCTOR
-        // No arguments
+        // CONSTRUCTORS: No arguments
         public Pastebin() { }
         // With one argument: DeveloperApiKey
         public Pastebin(string dak) { _developer_api_key = dak; }
@@ -185,72 +190,77 @@ namespace PastebinLib
     class PastebinArgs
     {
         // PRIVATE hashtable where values are stored
-        protected Hashtable ht;
+        private Hashtable ht;
         // PUBLIC string properties to set and get API arguments
         public string api_dev_key
         {
-            get { return ht.ContainsKey("api_dev_key") ? ht["api_dev_key"].ToString() : ""; }
+            get { return GetVal("api_dev_key"); }
             set { ht["api_dev_key"] = value; }
         }
         public string api_option
         {
-            get { return ht.ContainsKey("api_option") ? ht["api_option"].ToString() : ""; }
+            get { return GetVal("api_option"); }
             set { ht["api_option"] = value; }
         }
         public string api_paste_code
         {
-            get { return ht.ContainsKey("api_paste_code") ? ht["api_paste_code"].ToString() : ""; }
+            get { return GetVal("api_paste_code"); }
             set { ht["api_paste_code"] = value; }
         }
         public string api_paste_expire_date
         {
-            get { return ht.ContainsKey("api_paste_expire_date") ? ht["api_paste_expire_date"].ToString() : ""; }
+            get { return GetVal("api_paste_expire_date"); }
             set { ht["api_paste_expire_date"] = value; }
         }
         public string api_paste_format
         {
-            get { return ht.ContainsKey("api_paste_format") ? ht["api_paste_format"].ToString() : ""; }
+            get { return GetVal("api_paste_format"); }
             set { ht["api_paste_format"] = value; }
         }
         public string api_paste_key
         {
-            get { return ht.ContainsKey("api_paste_key") ? ht["api_paste_key"].ToString() : ""; }
+            get { return GetVal("api_paste_key"); }
             set { ht["api_paste_key"] = value; }
         }
         public string api_paste_name
         {
-            get { return ht.ContainsKey("api_paste_name") ? ht["api_paste_name"].ToString() : ""; }
+            get { return GetVal("api_paste_name"); }
             set { ht["api_paste_name"] = value; }
         }
         public string api_paste_private
         {
-            get { return ht.ContainsKey("api_paste_private") ? ht["api_paste_private"].ToString() : ""; }
+            get { return GetVal("api_paste_private"); }
             set { ht["api_paste_private"] = value; }
         }
         public string api_results_limit
         {
-            get { return ht.ContainsKey("api_results_limit") ? ht["api_results_limit"].ToString() : ""; }
+            get { return GetVal("api_results_limit"); }
             set { ht["api_results_limit"] = value; }
         }
         public string api_user_key
         {
-            get { return ht.ContainsKey("api_user_key") ? ht["api_user_key"].ToString() : ""; }
+            get { return GetVal("api_user_key"); }
             set { ht["api_user_key"] = value; }
         }
         public string api_user_name
         {
-            get { return ht.ContainsKey("api_user_name") ? ht["api_user_name"].ToString() : ""; }
+            get { return GetVal("api_user_name"); }
             set { ht["api_user_name"] = value; }
         }
         public string api_user_password
         {
-            get { return ht.ContainsKey("api_user_password") ? ht["api_user_password"].ToString() : ""; }
+            get { return GetVal("api_user_password"); }
             set { ht["api_user_password"] = value; }
         }
         public string paste_key
         {
-            get { return ht.ContainsKey("paste_key") ? ht["paste_key"].ToString() : ""; }
+            get { return GetVal("paste_key"); }
             set { ht["paste_key"] = value; }
+        }
+        // Returns the key is it exists
+        private string GetVal(string key)
+        {
+            return ht.ContainsKey(key) ? ht[key].ToString() : "";
         }
         // Return the hash, a function to match ToString
         public Hashtable ToHashtable() { return ht; }
@@ -274,7 +284,6 @@ namespace PastebinLib
         // CONSTRUCTOR
         public PastebinArgs() { ht = new Hashtable(); }
     }
-
     // Pastebin language options
     static class PastebinOptions
     {

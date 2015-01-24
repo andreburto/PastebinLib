@@ -99,6 +99,7 @@
             this.btnPost.TabIndex = 6;
             this.btnPost.Text = "New Paste";
             this.btnPost.UseVisualStyleBackColor = true;
+            this.btnPost.Click += new System.EventHandler(this.btnPost_Click);
             // 
             // Form1
             // 
