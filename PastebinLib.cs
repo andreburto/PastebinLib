@@ -10,7 +10,7 @@ using System.Web;
 
 namespace PastebinLib
 {
-    class Pastebin
+    public class Pastebin
     {
         // Protected variables
         protected string _developer_api_key;
@@ -358,7 +358,7 @@ namespace PastebinLib
     }
     // Pastebin class functions often take Hashtabe arguments.
     // PastebinAtgs will accept arguments and then output them as a Hashtable.
-    class PastebinArgs
+    public class PastebinArgs
     {
         // PRIVATE hashtable where values are stored
         private Hashtable ht;
@@ -456,7 +456,7 @@ namespace PastebinLib
         public PastebinArgs() { ht = new Hashtable(); }
     }
     // Pastebin language options
-    static class PastebinOptions
+    public static class PastebinOptions
     {
         // PRIVATE CONSTANTS
         static private string LANGUAGES = "PastebinLib.Languages.txt";
@@ -490,7 +490,7 @@ namespace PastebinLib
         }
     }
     // PastebinOption object for sorting
-    class PastebinOption : IComparable<PastebinOption>
+    public class PastebinOption : IComparable<PastebinOption>
     {
         public string Key;
         public string Val;
