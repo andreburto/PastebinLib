@@ -69,14 +69,57 @@ namespace PastebinLib
             }
             catch (Exception ex)
             {
-                retval = String.Format("ERROR: (MakeGet) {0}", ex.Message);
+                retval = String.Format("ERROR: (NewPaste) {0}", ex.Message);
             }
             return retval;
         }
         // Delete a Paste
         public string DeletePaste(Hashtable args)
         {
-            return "";
+            string retval;
+            try
+            {
+                // If there's no code to paste throw an error
+                if (args.ContainsKey("api_paste_key") == false)
+                {
+                    throw new Exception("Missing api_paste_key");
+                }
+                // You do not have to pass an api_dev_key but it must be set
+                if (args.ContainsKey("api_dev_key") == false)
+                {
+                    if (_developer_api_key.Length == 0)
+                    {
+                        throw new Exception("Missingapi_dev_key");
+                    }
+                    else
+                    {
+                        args.Add("api_dev_key", _developer_api_key);
+                    }
+                }
+                // You do not have to pass an api_user_key but it must be set
+                if (args.ContainsKey("api_user_key") == false)
+                {
+                    if (_user_key.Length == 0)
+                    {
+                        throw new Exception("NMising api_user_key");
+                    }
+                    else
+                    {
+                        args.Add("api_user_key", _user_key);
+                    }
+                }
+                // Default to delete
+                if (args.ContainsKey("api_option") == false)
+                {
+                    args.Add("api_option", "delete");
+                }
+                retval = MakePost(_post_url, args);
+            }
+            catch (Exception ex)
+            {
+                retval = String.Format("ERROR: (DeletePaste) {0}", ex.Message);
+            }
+            return retval;
         }
         // Get User info and settings 
         public string GetUserInfo(Hashtable args)
@@ -86,9 +129,35 @@ namespace PastebinLib
         // List Trending Pastes
         public string GetTrendingPastes(Hashtable args)
         {
-            return "";
+            string retval;
+            try
+            {
+                // You do not have to pass an api_dev_key but it must be set
+                if (args.ContainsKey("api_dev_key") == false)
+                {
+                    if (_developer_api_key.Length == 0)
+                    {
+                        throw new Exception("Missingapi_dev_key");
+                    }
+                    else
+                    {
+                        args.Add("api_dev_key", _developer_api_key);
+                    }
+                }
+                // Default to trends
+                if (args.ContainsKey("api_option") == false)
+                {
+                    args.Add("api_option", "trends");
+                }
+                retval = MakePost(_post_url, args);
+            }
+            catch (Exception ex)
+            {
+                retval = String.Format("ERROR: (GetTrendingPastes) {0}", ex.Message);
+            }
+            return retval;
         }
-        // List user Pastes
+        // List User Pastes
         public string GetUserPastes(Hashtable args)
         {
             return "";
@@ -330,7 +399,7 @@ namespace PastebinLib
                 foreach (string row in rows_read)
                 {
                     string[] parts = row.Split('=');
-                    values.Add(parts[0], parts[1]);
+                    values.Add(parts[1], parts[0]);
                 }
             }
             return values;
