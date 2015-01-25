@@ -192,17 +192,61 @@ namespace PastebinLib
             }
             catch (Exception ex)
             {
-                retval = String.Format("ERROR: (GetTrendingPastes) {0}", ex.Message);
+                retval = String.Format("ERROR: (TrendingPastes) {0}", ex.Message);
             }
             return retval;
         }
         // List User Pastes
-        public string UserPastes(Hashtable args)
+        public string ListUserPastes(Hashtable args)
         {
-            return "";
+            string retval;
+            try
+            {
+                // You do not have to pass an api_dev_key but it must be set
+                if (args.ContainsKey("api_dev_key") == false)
+                {
+                    if (_developer_api_key.Length == 0)
+                    {
+                        throw new Exception("Missingapi_dev_key");
+                    }
+                    else
+                    {
+                        args.Add("api_dev_key", _developer_api_key);
+                    }
+                }
+                // You do not have to pass an api_user_key but it must be set
+                if (args.ContainsKey("api_user_key") == false)
+                {
+                    if (_user_key.Length == 0)
+                    {
+                        throw new Exception("Mising api_user_key");
+                    }
+                    else
+                    {
+                        args.Add("api_user_key", _user_key);
+                    }
+                }
+                // Make sure maximum api_results_limit is under 1000
+                if (args.ContainsKey("api_results_limit") == true)
+                {
+                    int limit = Int16.Parse(args["api_results_limit"].ToString());
+                    if (limit > 1000) { args["api_results_limit"] = "1000"; }
+                }
+                // Default to delete
+                if (args.ContainsKey("api_option") == false)
+                {
+                    args.Add("api_option", "list");
+                }
+                retval = MakePost(_post_url, args);
+            }
+            catch (Exception ex)
+            {
+                retval = String.Format("ERROR: (ListUserInfo) {0}", ex.Message);
+            }
+            return retval;
         }
         // Get the UserApiKey
-        public string GetUserKey(Hashtable args)
+        public string UserKey(Hashtable args)
         {
             string retval;
             try
@@ -235,7 +279,7 @@ namespace PastebinLib
             }
             catch (Exception ex)
             {
-                retval = String.Format("ERROR: (GetUserKey) {0}", ex.Message);
+                retval = String.Format("ERROR: (UserKey) {0}", ex.Message);
             }
             return retval;
         }
