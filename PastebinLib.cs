@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -101,7 +102,7 @@ namespace PastebinLib
                 {
                     if (_user_key.Length == 0)
                     {
-                        throw new Exception("NMising api_user_key");
+                        throw new Exception("Mising api_user_key");
                     }
                     else
                     {
@@ -122,12 +123,50 @@ namespace PastebinLib
             return retval;
         }
         // Get User info and settings 
-        public string GetUserInfo(Hashtable args)
+        public string UserInfo(Hashtable args)
         {
-            return "";
+            string retval;
+            try
+            {
+                // You do not have to pass an api_dev_key but it must be set
+                if (args.ContainsKey("api_dev_key") == false)
+                {
+                    if (_developer_api_key.Length == 0)
+                    {
+                        throw new Exception("Missingapi_dev_key");
+                    }
+                    else
+                    {
+                        args.Add("api_dev_key", _developer_api_key);
+                    }
+                }
+                // You do not have to pass an api_user_key but it must be set
+                if (args.ContainsKey("api_user_key") == false)
+                {
+                    if (_user_key.Length == 0)
+                    {
+                        throw new Exception("Mising api_user_key");
+                    }
+                    else
+                    {
+                        args.Add("api_user_key", _user_key);
+                    }
+                }
+                // Default to delete
+                if (args.ContainsKey("api_option") == false)
+                {
+                    args.Add("api_option", "userdetails");
+                }
+                retval = MakePost(_post_url, args);
+            }
+            catch (Exception ex)
+            {
+                retval = String.Format("ERROR: (UserInfo) {0}", ex.Message);
+            }
+            return retval;
         }
         // List Trending Pastes
-        public string GetTrendingPastes(Hashtable args)
+        public string TrendingPastes(Hashtable args)
         {
             string retval;
             try
@@ -158,7 +197,7 @@ namespace PastebinLib
             return retval;
         }
         // List User Pastes
-        public string GetUserPastes(Hashtable args)
+        public string UserPastes(Hashtable args)
         {
             return "";
         }
@@ -380,15 +419,15 @@ namespace PastebinLib
         static private string PRIVACY = "PastebinLib.Privacy.txt";
         static private string EXPIRES = "PastebinLib.Expires.txt";
         // PUBLIC READ-ONLY PROPERTIES
-        static public Hashtable Languages { get { return LoadOptions(LANGUAGES); } }
-        static public Hashtable Privacy { get { return LoadOptions(PRIVACY); } }
-        static public Hashtable Expires { get { return LoadOptions(EXPIRES); } }
+        static public PastebinOption[] Languages { get { return LoadOptions(LANGUAGES); } }
+        static public PastebinOption[] Privacy { get { return LoadOptions(PRIVACY); } }
+        static public PastebinOption[] Expires { get { return LoadOptions(EXPIRES); } }
         // Fetch the results
-        static private Hashtable LoadOptions(string choice)
+        static private PastebinOption[] LoadOptions(string choice)
         {
-            Hashtable values = new Hashtable();
             string bulk_read = "";
             string[] rows_read;
+            List<PastebinOption> values = new List<PastebinOption>();
             // Read the embedded file
             Assembly a = Assembly.GetExecutingAssembly();
             StreamReader sr = new StreamReader(a.GetManifestResourceStream(choice));
@@ -399,10 +438,37 @@ namespace PastebinLib
                 foreach (string row in rows_read)
                 {
                     string[] parts = row.Split('=');
-                    values.Add(parts[1], parts[0]);
+                    values.Add(new PastebinOption(parts[0], parts[1]));
                 }
             }
-            return values;
+            values.Sort();
+            return values.ToArray<PastebinOption>();
+        }
+    }
+    // PastebinOption object for sorting
+    class PastebinOption : IComparable<PastebinOption>
+    {
+        public string Key;
+        public string Val;
+
+        public int CompareTo(PastebinOption other)
+        {
+            if (this.Val == other.Val)
+            {
+                return this.Key.CompareTo(other.Key);
+            }
+            return this.Val.CompareTo(other.Val);
+        }
+
+        public override string ToString()
+        {
+            return String.Format("{0} ({1})", this.Val, this.Key);
+        }
+
+        public PastebinOption(string k, string v)
+        {
+            this.Key = k;
+            this.Val = v;
         }
     }
 }
